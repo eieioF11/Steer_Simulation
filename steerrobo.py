@@ -101,10 +101,6 @@ class steer(object):
             self.Collision=True
             self.y=-self.fieldlimity
         #ホイール角度計算
-        #self.wheelangle[0]=atan2(-self.vx+self.r*self.w*cos(self.yaw),self.vy-self.r*self.w*sin(self.yaw))#A
-        #self.wheelangle[1]=atan2(-self.vx+self.r*self.w*sin(self.yaw),self.vy+self.r*self.w*cos(self.yaw))#D
-        #self.wheelangle[2]=atan2(-self.vx-self.r*self.w*sin(self.yaw),self.vy-self.r*self.w*cos(self.yaw))#B
-        #self.wheelangle[3]=atan2(-self.vx-self.r*self.w*cos(self.yaw),self.vy+self.r*self.w*sin(self.yaw))#C
         self.wheelangle[0]=atan2(-self.vx+self.r*self.w,self.vy-self.r*self.w)#A
         self.wheelangle[1]=atan2(-self.vx+self.r*self.w,self.vy+self.r*self.w)#D
         self.wheelangle[2]=atan2(-self.vx-self.r*self.w,self.vy-self.r*self.w)#B
