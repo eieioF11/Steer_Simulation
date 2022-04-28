@@ -37,8 +37,19 @@ class steer(object):
         self.vy=0.0
         self.w=0.0
         self.oldtime=time.time()
+        self.wheelspeed=[0.0,0.0,0.0,0.0]
         self.wheelangle=[0.0,0.0,0.0,0.0]
         self.key=""
+    def WheelSpeed(self):
+        return self.wheelspeed
+    def WheelAngle(self):
+        return self.wheelangle
+    def DeltaT(self):
+        return self.dt
+    def Twist(self):
+        return [self.vx,self.vy,self.w]
+    def Odometry(self):
+        return [self.x,self.y,self.yaw]
     #キー入力関連
     def press(self,event):
         print('press', event.key)
@@ -65,6 +76,10 @@ class steer(object):
         self.wheelangle[1]=atan2(-self.vx+self.r*self.w,self.vy+self.r*self.w)#D
         self.wheelangle[2]=atan2(-self.vx-self.r*self.w,self.vy-self.r*self.w)#B
         self.wheelangle[3]=atan2(-self.vx-self.r*self.w,self.vy+self.r*self.w)#C
+        self.wheelspeed[0]=sqrt((-self.vx+self.r*self.w)**2+(self.vy-self.r*self.w)**2)#A
+        self.wheelspeed[1]=sqrt((-self.vx+self.r*self.w)**2+(self.vy+self.r*self.w)**2)#D
+        self.wheelspeed[2]=sqrt((-self.vx-self.r*self.w)**2+(self.vy-self.r*self.w)**2)#B
+        self.wheelspeed[3]=sqrt((-self.vx-self.r*self.w)**2+(self.vy+self.r*self.w)**2)#C
         #描画更新
         def relative_rectangle(w: float, h: float, center_tf, **kwargs):
             rect_origin_to_center = Affine2D().translate(w / 2, h / 2)
@@ -99,6 +114,7 @@ class steer(object):
         self.ax.add_patch(right_rear_wheel)
         self.ax.add_patch(body)
         #debag
+        #print(self.wheelspeed)
         print("dt={:6.2f}[s]v({:6.2f},{:6.2f},{:6.2f}),xy({:6.2f},{:6.2f}),yaw={:6.2f},ABCD({:6.2f},{:6.2f},{:6.2f},{:6.2f})".format(self.dt,self.vx,self.vy,self.w,self.x,self.y,degrees(self.yaw),degrees(self.wheelangle[0]),degrees(self.wheelangle[0]),degrees(self.wheelangle[1]),degrees(self.wheelangle[2]),degrees(self.wheelangle[3])))
         #描画
         plt.pause(0.01)
