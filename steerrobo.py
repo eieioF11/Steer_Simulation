@@ -12,7 +12,7 @@ from matplotlib.patches import Rectangle
 from matplotlib.transforms import Affine2D
 
 class steer(object):
-    def __init__(self):
+    def __init__(self,debug=True):
         #Parametors--------------------------------------
         figsize=[3,3]#[m]fieldサイズ
         self.size=0.2#[m]robotのbodyサイズ(正方形)
@@ -22,6 +22,8 @@ class steer(object):
         self.wpos=self.size/2#wheel position
         self.r=sqrt(self.wpos**2+self.wpos**2)#[m]
         #------------------------------------------------
+        self.fieldlimitx=figsize[0]/2-(self.size/2+self.wsize_h/2)
+        self.fieldlimity=figsize[1]/2-(self.size/2+self.wsize_h/2)
         self.fig, self.ax = plt.subplots(1, 1)
         self.ax.set_aspect('equal')
         self.ax.set_xlabel("x[m]")
@@ -40,6 +42,8 @@ class steer(object):
         self.wheelspeed=[0.0,0.0,0.0,0.0]
         self.wheelangle=[0.0,0.0,0.0,0.0]
         self.key=""
+        self.debug=debug
+        self.Collision=False
     def WheelSpeed(self):
         return self.wheelspeed
     def WheelAngle(self):
@@ -52,13 +56,29 @@ class steer(object):
         return [self.x,self.y,self.yaw]
     #キー入力関連
     def press(self,event):
-        print('press', event.key)
+        if self.debug:
+            print('press', event.key)
         sys.stdout.flush()
         self.key=event.key
     def returnkey(self):
         return self.key
     def resetkey(self):
         self.key=""
+    #reset
+    def resetv(self):
+        self.vx=0.0
+        self.vy=0.0
+        self.w=0.0
+    def resetp(self):
+        self.x=0.0
+        self.y=0.0
+        self.yaw=0.0
+    def reset(self):
+        self.resetv()
+        self.resetp()
+    #collision
+    def collision(self):
+        return self.Collision
     #シュミレーション更新
     def update(self):
         nowtime = time.time()
@@ -67,6 +87,19 @@ class steer(object):
         self.yaw+=self.w*self.dt
         self.x+=(self.vx*cos(self.yaw)-self.vy*sin(self.yaw))*self.dt
         self.y+=(self.vx*sin(self.yaw)+self.vy*cos(self.yaw))*self.dt
+        self.Collision=False
+        if self.x>self.fieldlimitx:
+            self.Collision=True
+            self.x=self.fieldlimitx
+        if self.x<-self.fieldlimitx:
+            self.Collision=True
+            self.x=-self.fieldlimitx
+        if self.y>self.fieldlimity:
+            self.Collision=True
+            self.y=self.fieldlimity
+        if self.y<-self.fieldlimity:
+            self.Collision=True
+            self.y=-self.fieldlimity
         #ホイール角度計算
         #self.wheelangle[0]=atan2(-self.vx+self.r*self.w*cos(self.yaw),self.vy-self.r*self.w*sin(self.yaw))#A
         #self.wheelangle[1]=atan2(-self.vx+self.r*self.w*sin(self.yaw),self.vy+self.r*self.w*cos(self.yaw))#D
@@ -114,8 +147,8 @@ class steer(object):
         self.ax.add_patch(right_rear_wheel)
         self.ax.add_patch(body)
         #debag
-        #print(self.wheelspeed)
-        print("dt={:6.2f}[s]v({:6.2f},{:6.2f},{:6.2f}),xy({:6.2f},{:6.2f}),yaw={:6.2f},ABCD({:6.2f},{:6.2f},{:6.2f},{:6.2f})".format(self.dt,self.vx,self.vy,self.w,self.x,self.y,degrees(self.yaw),degrees(self.wheelangle[0]),degrees(self.wheelangle[0]),degrees(self.wheelangle[1]),degrees(self.wheelangle[2]),degrees(self.wheelangle[3])))
+        if(self.debug):
+            print("dt={:6.2f}[s]v({:6.2f},{:6.2f},{:6.2f}),xy({:6.2f},{:6.2f}),yaw={:6.2f},ABCD({:6.2f},{:6.2f},{:6.2f},{:6.2f})v({:6.2f},{:6.2f},{:6.2f},{:6.2f})".format(self.dt,self.vx,self.vy,self.w,self.x,self.y,degrees(self.yaw),degrees(self.wheelangle[0]),degrees(self.wheelangle[0]),degrees(self.wheelangle[1]),degrees(self.wheelangle[2]),degrees(self.wheelangle[3]),self.wheelspeed[0],self.wheelspeed[1],self.wheelspeed[2],self.wheelspeed[3]))
         #描画
         plt.pause(0.01)
         #削除

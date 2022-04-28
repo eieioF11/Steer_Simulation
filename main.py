@@ -1,7 +1,7 @@
 import sys
 from steerrobo import *
 
-robot=steer()
+robot=steer(False)
 def main():
     vx=0.0
     vy=0.0
@@ -22,6 +22,12 @@ def main():
             w+=0.01
         elif key=="x":
             w-=0.01
+        elif key=="r":
+            robot.reset()
+        if robot.collision():
+            vx=0.0
+            vy=0.0
+            w=0.0
         robot.resetkey()
         robot.move(vx,vy,w)
         robot.update()
